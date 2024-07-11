@@ -153,3 +153,14 @@ monthPicker.onchange = function() {
 
 fetchReservations();
 updateMonthPicker();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const setThemeFromSystem = () => {
+        const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', theme);
+    };
+
+    setThemeFromSystem();
+
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(setThemeFromSystem);
+});
