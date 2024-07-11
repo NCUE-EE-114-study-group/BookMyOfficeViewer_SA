@@ -15,7 +15,7 @@
     --button-text-color: #fff;
 }
 body {
-    max-width: 1200px;
+    max-width: 900px;
     font-family: 'Roboto', sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
