@@ -13,13 +13,14 @@
     --text-color: white;
     --button-color: #8f5fe1;
     --button-text-color: #fff;
+    --modal-background-color: #424242;
+    --modal-text-color: #fff;
 }
 body {
-    max-width: 900px;
     font-family: 'Roboto', sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
-    margin: auto;
+    margin: 0;
     padding: 20px;
     transition: background-color 0.3s, color 0.3s;
     display: flex;
@@ -88,7 +89,8 @@ th {
     padding-top: 60px;
 }
 .modal-content {
-    background-color: #fefefe;
+    background-color: var(--modal-background-color, #fefefe);
+    color: var(--modal-text-color, #333);
     margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
