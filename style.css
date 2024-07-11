@@ -116,3 +116,6 @@ th {
     font-size: 24px;
     color: var(--primary-color);
 }
+#calendar td {
+    height: 20px;
+}
