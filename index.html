@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生會辦公室借用狀態查詢表</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body data-theme="light">
+    <div class="loading" id="loading">Loading...</div>
+    <div class="header">學生會辦公室借用狀態查詢表</div>
+    <div class="controls">
+        <button onclick="prevYear()"><<</button>
+        <button onclick="prevMonth()"><</button>
+        <input type="month" id="monthPicker">
+        <button onclick="nextMonth()">></button>
+        <button onclick="nextYear()">>></button>
+        <!-- <button onclick="toggleTheme()">切換暗/亮模式</button> -->
+    </div>
+    <h2 id="monthYear" style="display: none;"></h2>
+    <table id="calendar">
+        <thead>
+            <tr>
+                <th>日</th>
+                <th>一</th>
+                <th>二</th>
+                <th>三</th>
+                <th>四</th>
+                <th>五</th>
+                <th>六</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>借用列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>借用人姓名</th>
+                        <th>借用事由</th>
+                        <th>擬借用之辦公室</th>
+                        <th>借用日期</th>
+                        <th>借用時間（起）</th>
+                        <th>借用時間（迄）</th>
+                    </tr>
+                </thead>
+                <tbody id="reservationList"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="./main.js"></script>
+</body>
+</html>
