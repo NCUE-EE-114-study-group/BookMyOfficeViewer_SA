@@ -10,7 +10,7 @@ const spreadsheet_id = "";
 const tab_name = "";
 const api_key = "";
 // const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheet_id}/values/${tab_name}?key=${api_key}`;
-const url = "./test.json";
+const url = "test.json";
 
 const modal = document.getElementById("myModal");
 const span = document.getElementsByClassName("close")[0];
