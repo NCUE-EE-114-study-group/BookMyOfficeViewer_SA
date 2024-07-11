@@ -17,6 +17,7 @@
     --modal-text-color: #fff;
 }
 body {
+    max-width: 900px;
     font-family: 'Roboto', sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
