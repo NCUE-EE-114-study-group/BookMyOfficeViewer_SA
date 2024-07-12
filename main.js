@@ -9,7 +9,6 @@ let reservations = {};
 const spreadsheet_id = "";
 const tab_name = "";
 const api_key = "";
-// const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheet_id}/values/${tab_name}?key=${api_key}`;
 const url = "test.json";
 
 const modal = document.getElementById("myModal");
@@ -101,7 +100,7 @@ function showModal(date) {
         row.innerHTML = `
             <td>${reservation.name}</td>
             <td>${reservation.reason}</td>
-            <td>${reservation.office}</td>
+            <td>${reservation.office}</td
             <td>${reservation.date}</td>
             <td>${reservation.startTime}</td>
             <td>${reservation.endTime}</td>
@@ -145,10 +144,14 @@ function toggleTheme() {
 }
 
 monthPicker.onchange = function() {
-    const [year, month] = monthPicker.value.split('-');
-    currentDate.setFullYear(year);
-    currentDate.setMonth(month - 1);
-    generateCalendar(currentDate);
+    if (!this.value) {
+        updateMonthPicker();
+    } else {
+        const [year, month] = this.value.split('-');
+        currentDate.setFullYear(year);
+        currentDate.setMonth(month - 1);
+        generateCalendar(currentDate);
+    }
 };
 
 fetchReservations();
