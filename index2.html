@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生會辦公室借用狀態查詢表</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #333;
+            font-family: 'Helvetica Neue', sans-serif;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 250px;
+            background: #111;
+            color: #fff;
+            padding: 20px;
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .sidebar .monthly-list, .sidebar .past-list {
+            margin-top: 20px;
+        }
+        .sidebar .monthly-list h3, .sidebar .past-list h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+        .sidebar .monthly-list ul, .sidebar .past-list ul {
+            list-style: none;
+        }
+        .sidebar .monthly-list li, .sidebar .past-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #ccc;
+        }
+        .sidebar .monthly-list li:hover, .sidebar .past-list li:hover {
+            color: #fff;
+        }
+        .main-content {
+            flex: 1;
+            background: #1c1c1c;
+            padding: 20px;
+            color: #fff;
+        }
+        .main-content header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .main-content header button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .main-content header button:hover {
+            background: #0056b3;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 10px;
+        }
+        .calendar .day-name {
+            text-align: center;
+            font-weight: bold;
+            color: #aaa;
+            padding: 10px 0;
+        }
+        .calendar .day {
+            height: 60px;
+            background: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .calendar .day.occupied {
+            background: #b71c1c; /* 深紅色 */
+            color: white;
+        }
+        .calendar .day.pending {
+            background: #ffc13b; /* 黃色 */
+            color: black;
+        }
+        .calendar .day.active {
+            background: #007bff; /* 藍色 */
+        }
+        .calendar .day.today {
+            background: #4caf50; /* 綠色 */
+            color: white;
+        }
+        .calendar .day.today-task {
+            background: #e32b2b; /* 深紅色 */
+            color: white;
+        }
+        .calendar .day.inactive {
+            color: #666;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #424242;
+            color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .loading {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #007bff;
+        }
+        .reservation-item {
+            border-bottom: 1px solid #555;
+            padding: 10px 0;
+        }
+        .reservation-item:last-child {
+            border-bottom: none;
+        }
+        .reservation-item h3 {
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+            color: #ffeb3b; /* 黄色 */
+        }
+        .reservation-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .reservation-details div {
+            margin: 5px 0;
+        }
+        .reservation-details div span {
+            display: block;
+            font-weight: bold;
+            color: #aaa;
+        }
+        .list-item {
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: black !important;
+            font-weight: bold;
+        }
+        .urgent {
+            background-color: #ff5252;
+            color: black;
+        }
+        .ongoing {
+            background-color: #e32b2b;
+            color: white;
+        }
+        .upcoming {
+            background-color: #ffeb3b;
+            color: black;
+        }
+        .future {
+            background-color: #43a047;
+            color: white;
+        }
+        .past {
+            background-color: #9e9e9e;
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .sidebar .monthly-list, .sidebar .past-list {
+                display: none !important;
+            }
+            .reservation-details {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        @media (max-width: 450px) {
+            .main-content {
+                padding: 10px;
+            }
+            .calendar {
+                grid-gap: 5px;
+            }
+            .calendar .day {
+                height: 40px;
+                font-size: 0.9rem;
+            }
+            .main-content header button {
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="loading" id="loading">Loading...</div>
+    <div class="container">
+        <div class="sidebar">
+            <h2>學生會辦公室借用狀態查詢</h2>
+            <div class="monthly-list">
+                <h3>本月借用清單</h3>
+                <ul id="monthlyReservations"></ul>
+            </div>
+            <div class="past-list" id="pastListContainer">
+                <h3>過去的活動</h3>
+                <ul id="pastReservations"></ul>
+            </div>
+        </div>
+        <div class="main-content">
+            <header>
+                <button id="prev">〈 上個月</button>
+                <p class="current-date"></p>
+                <button id="next">下個月 〉</button>
+            </header>
+            <div class="calendar">
+                <div class="day-name">日</div>
+                <div class="day-name">一</div>
+                <div class="day-name">二</div>
+                <div class="day-name">三</div>
+                <div class="day-name">四</div>
+                <div class="day-name">五</div>
+                <div class="day-name">六</div>
+            </div>
+        </div>
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2 class="reservation-item">借用列表</h2>
+            <div id="reservationList">目前沒有安排的事項</div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        const calendarBody = document.querySelector(".calendar");
+        const currentDate = document.querySelector(".current-date");
+        const prevButton = document.getElementById("prev");
+        const nextButton = document.getElementById("next");
+        const loading = document.getElementById("loading");
+        const monthlyReservations = document.getElementById("monthlyReservations");
+        const pastReservations = document.getElementById("pastReservations");
+        const pastListContainer = document.getElementById("pastListContainer");
+
+        let currYear = new Date().getFullYear();
+        let currMonth = new Date().getMonth();
+
+        let reservations = {};
+
+        const spreadsheet_id = "";
+        const tab_name = "";
+        const api_key = "";
+        // const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheet_id}/values/${tab_name}?key=${api_key}`;
+        const url = "test.json";  // 替換為 Google Sheets API URL
+
+        const modal = document.getElementById("myModal");
+        const span = document.getElementsByClassName("close")[0];
+        const reservationList = document.getElementById("reservationList");
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                modal.style.display = "none";
+            }
+        });
+
+        function parseDate(dateString) {
+            const parts = dateString.split('/');
+            const year = parts[0];
+            const month = parts[1].padStart(2, '0');
+            const day = parts[2].padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function fetchReservations() {
+            loading.style.display = "block";
+            $.getJSON(url, function(data) {
+                const rows = data.values;
+                for (let i = 2; i < rows.length; i++) {
+                    const row = rows[i];
+                    const date = parseDate(row[10]);
+                    if (!reservations[date]) {
+                        reservations[date] = [];
+                    }
+                    reservations[date].push({
+                        name: row[6],
+                        reason: row[8],
+                        office: row[9],
+                        date: date,
+                        startTime: row[11],
+                        endTime: row[12]
+                    });
+                }
+                generateCalendar(currYear, currMonth);
+                loading.style.display = "none";
+            });
+        }
+
+        function generateCalendar(year, month) {
+            calendarBody.innerHTML = `
+                <div class="day-name">日</div>
+                <div class="day-name">一</div>
+                <div class="day-name">二</div>
+                <div class="day-name">三</div>
+                <div class="day-name">四</div>
+                <div class="day-name">五</div>
+                <div class="day-name">六</div>
+            `;
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+            const lastDayOfMonth = new Date(year, month, lastDateOfMonth).getDay();
+            const lastDateOfLastMonth = new Date(year, month, 0).getDate();
+
+            let daysHTML = "";
+
+            for (let i = firstDayOfMonth; i > 0; i--) {
+                daysHTML += `<div class="day inactive">${lastDateOfLastMonth - i + 1}</div>`;
+            }
+
+            const monthlyReservationList = [];
+            const pastReservationList = [];
+            const today = new Date().toDateString();
+
+            for (let i = 1; i <= lastDateOfMonth; i++) {
+                const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                let isToday = new Date(currentDateStr).toDateString() === today ? "today" : "";
+                let dayClass = isToday;
+                if (reservations[currentDateStr]) {
+                    dayClass = isToday ? "today-task" : "occupied";
+                    if (new Date(currentDateStr) < new Date(today)) {
+                        pastReservationList.push(...reservations[currentDateStr].map(reservation => ({ ...reservation, className: 'past' })));
+                    } else if (new Date(currentDateStr).toDateString() === today) {
+                        monthlyReservationList.push(...reservations[currentDateStr].map(reservation => ({ ...reservation, className: 'ongoing' })));
+                    } else {
+                        const diffDays = Math.ceil((new Date(currentDateStr) - new Date(today)) / (1000 * 60 * 60 * 24));
+                        let className = 'future';
+                        if (diffDays <= 3) {
+                            className = 'urgent';
+                        } else if (diffDays <= 7) {
+                            className = 'upcoming';
+                        }
+                        monthlyReservationList.push(...reservations[currentDateStr].map(reservation => ({ ...reservation, className })));
+                    }
+                }
+                daysHTML += `<div class="day ${dayClass}" data-date="${currentDateStr}">${i}</div>`;
+            }
+
+            for (let i = lastDayOfMonth; i < 6; i++) {
+                daysHTML += `<div class="day inactive">${i - lastDayOfMonth + 1}</div>`;
+            }
+
+            currentDate.innerText = `${year}年 ${month + 1}月`;
+            calendarBody.innerHTML += daysHTML;
+
+            document.querySelectorAll(".day").forEach(day => {
+                if (day.dataset.date && reservations[day.dataset.date]) {
+                    day.onclick = () => showModal(day.dataset.date);
+                }
+            });
+
+            // 更新月度借用列表
+            monthlyReservations.innerHTML = '';
+            if (monthlyReservationList.length === 0) {
+                const noItems = document.createElement("li");
+                noItems.textContent = "目前沒有安排的事項";
+                monthlyReservations.appendChild(noItems);
+            } else {
+                monthlyReservationList.sort((a, b) => new Date(a.date) - new Date(b.date));
+                monthlyReservationList.forEach(reservation => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${reservation.date}: ${reservation.reason}`;
+                    listItem.classList.add('list-item', reservation.className);
+                    listItem.onclick = () => showModal(reservation.date);
+                    monthlyReservations.appendChild(listItem);
+                });
+            }
+
+            // 更新過去的活動列表
+            pastReservations.innerHTML = '';
+            pastReservationList.sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (pastReservationList.length === 0) {
+                pastListContainer.style.display = 'none';
+            } else {
+                pastReservationList.forEach(reservation => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${reservation.date}: ${reservation.reason}`;
+                    listItem.classList.add('list-item', reservation.className);
+                    listItem.onclick = () => showModal(reservation.date);
+                    pastReservations.appendChild(listItem);
+                });
+                pastListContainer.style.display = 'block';
+            }
+        }
+
+        function showModal(date) {
+            reservationList.innerHTML = '';
+            reservations[date].forEach(reservation => {
+                const item = document.createElement("div");
+                item.classList.add("reservation-item");
+                item.innerHTML = `
+                    <h3>${reservation.name}</h3>
+                    <div class="reservation-details">
+                        <div>
+                            <span>事由:</span> ${reservation.reason}
+                        </div>
+                        <div>
+                            <span>辦公室:</span> ${reservation.office}
+                        </div>
+                        <div>
+                            <span>日期:</span> ${reservation.date}
+                        </div>
+                        <div>
+                            <span>時間:</span> ${reservation.startTime} - ${reservation.endTime}
+                        </div>
+                    </div>
+                `;
+                reservationList.appendChild(item);
+            });
+            if (reservationList.innerHTML === '') {
+                reservationList.innerHTML = '目前沒有安排的事項';
+            }
+            modal.style.display = "block";
+        }
+
+        function prevMonth() {
+            currMonth--;
+            if (currMonth < 0) {
+                currYear--;
+                currMonth = 11;
+            }
+            generateCalendar(currYear, currMonth);
+        }
+
+        function nextMonth() {
+            currMonth++;
+            if (currMonth > 11) {
+                currYear++;
+                currMonth = 0;
+            }
+            generateCalendar(currYear, currMonth);
+        }
+
+        prevButton.addEventListener("click", prevMonth);
+        nextButton.addEventListener("click", nextMonth);
+
+        fetchReservations();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const setThemeFromSystem = () => {
+                const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.body.setAttribute('data-theme', theme);
+            };
+
+            setThemeFromSystem();
+
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(setThemeFromSystem);
+        });
+
+    </script>
+</body>
+</html>
