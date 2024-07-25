@@ -25,6 +25,22 @@ body {
     background: #111;
     color: #fff;
     padding: 20px;
+    max-height: 75vh;
+    overflow-y: auto; /* 啟用垂直滾動條 */
+}
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+    background: #333;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+    border: 2px solid #333;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 .sidebar h2 {
     margin-bottom: 20px;
